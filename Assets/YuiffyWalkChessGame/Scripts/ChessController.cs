@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using static CommonUtil;
 
 enum ChessState {
     MANAGE,
@@ -15,7 +17,7 @@ public class ChessController : MonoBehaviour
     public int x;
     public int y;
     public int atk = 50;
-    public int hp = 500;
+    public int maxHp = 500;
     public int atkRange = 300;
     public int jumpRange = 1;
     public int jumpSpeed = 500;
@@ -24,6 +26,8 @@ public class ChessController : MonoBehaviour
     public float atkCooldown = 1.0f;
     public float beforeAtkTime = 0.2f;
     public float afterAtkTime = 0.3f;
+
+    private int hp;
 
     private ChessBoardController board;
     private Transform tf;
@@ -39,6 +43,7 @@ public class ChessController : MonoBehaviour
     private float nowAttackCooldown = 0.0f;
 
     private float attackDoingTime = 0.0f;
+    private GameObject hpBar;
 
     // Start is called before the first frame update
     void Start()
@@ -52,8 +57,13 @@ public class ChessController : MonoBehaviour
         tf = GetComponent<Transform>();
         Vector3 pos = board.GetChessPosition(x, y);
         tf.SetPositionAndRotation(pos, tf.rotation);
+        hp = maxHp;
         attr = new BattleUnitAttr();
         getAttrs();
+        GameObject HpBar = Resources.Load("Prefabs/HpBar") as GameObject;
+        hpBar = GameObject.Instantiate(HpBar);
+        hpBar.transform.parent = GameObject.Find("HpCanvas").transform;
+        Update2DObj();
     }
 
     // Update is called once per frame
@@ -72,8 +82,9 @@ public class ChessController : MonoBehaviour
                     //减少跳跃冷却
                     if (jumpingCooldown > 0.0f) jumpingCooldown -= Time.deltaTime;
                     //没目标就寻找目标
-                    if (!aim) {
+                    if (!aim || !aim.gameObject) {
                         SearchAim();
+                        if (!aim) return;//没目标就不用动了
                     }
                     if (Vector3.Distance(tf.position, aim.tf.position) > attr.realAtkRange)
                     {
@@ -90,7 +101,7 @@ public class ChessController : MonoBehaviour
                     }
                     else {
                         //距离够，打
-                        Debug.Log("Fight!"+tf.position+","+aim.tf.position);
+                        //Debug.Log("Fight!"+tf.position+","+aim.tf.position);
                         if (nowAttackCooldown <= beforeAtkTime)
                         {
                             StartAttack();
@@ -104,12 +115,17 @@ public class ChessController : MonoBehaviour
             case ChessState.JUMPING:
                 {
                     jumpingTimeCost += Time.deltaTime;
-                    if (jumpingTimeCost >= 1.0f) {
+                    float jumpingProgress = jumpingTimeCost * jumpSpeed / 100;
+                    if (jumpingProgress >= 1.0f) {
                         SitDown();
                     }
-                    Vector3 newPos = Vector3.Lerp(board.GetChessPosition(x, y), board.GetChessPosition(jumpingTo.x, jumpingTo.y), jumpingTimeCost);
-                    Debug.Log("newPos="+newPos);
-                    tf.SetPositionAndRotation(newPos, tf.rotation);
+                    else
+                    {
+                        Vector3 newPos = Vector3.Lerp(board.GetChessPosition(x, y), board.GetChessPosition(jumpingTo.x, jumpingTo.y), jumpingProgress);
+                        //Debug.Log("newPos="+newPos);
+                        tf.SetPositionAndRotation(newPos, tf.rotation);
+                    }
+                    Update2DObj();
                     break;
                 }
             case ChessState.ATTACKING:
@@ -126,9 +142,10 @@ public class ChessController : MonoBehaviour
     }
 
     void SearchAim() {
+        aim = null;
         ChessController[] chesses = board.chesses;
         foreach (ChessController chess in chesses) {
-            if (chess.team == enemyTeam)
+            if (chess && chess.gameObject && chess.team == enemyTeam)
             {
                 aim = chess;
                 break;
@@ -182,6 +199,22 @@ public class ChessController : MonoBehaviour
         state = ChessState.BATTLE;
         //TODO: 放波
         aim.hp -= atk;
+        aim.BeAttacked(new AtkAttr(atk), this);
         nowAttackCooldown = atkCooldown;
+    }
+
+    void BeAttacked(AtkAttr atkAttr, System.Object fromObj) {
+        hp -= atk;
+        Update2DObj();
+        if (hp <= 0) {
+            Destroy(hpBar.gameObject);
+            Destroy(this.gameObject);
+        }
+    }
+
+    void Update2DObj() {
+        Vector2 pos2d = RectTransformUtility.WorldToScreenPoint(GameObject.Find("Main Camera").GetComponent<Camera>(), tf.position + new Vector3(0,0.8f,0));
+        hpBar.transform.position = pos2d;
+        hpBar.GetComponent<Image>().fillAmount = 1.0f*hp/maxHp;
     }
 }
