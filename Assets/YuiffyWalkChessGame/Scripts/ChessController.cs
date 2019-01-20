@@ -26,6 +26,9 @@ public class ChessController : MonoBehaviour
     public float atkCooldown = 1.0f;
     public float beforeAtkTime = 0.2f;
     public float afterAtkTime = 0.3f;
+    public int bulletSpeed = 500;
+    public Color bulletColor = Color.red;
+    public Color chessColor = Color.white;
 
     private int hp;
 
@@ -60,6 +63,7 @@ public class ChessController : MonoBehaviour
         hp = maxHp;
         attr = new BattleUnitAttr();
         getAttrs();
+        GetComponent<MeshRenderer>().material.color = chessColor;
         GameObject HpBar = Resources.Load("Prefabs/HpBar") as GameObject;
         hpBar = GameObject.Instantiate(HpBar);
         hpBar.transform.parent = GameObject.Find("HpCanvas").transform;
@@ -198,13 +202,27 @@ public class ChessController : MonoBehaviour
     void DoAttack() {
         state = ChessState.BATTLE;
         //TODO: 放波
-        aim.hp -= atk;
-        aim.BeAttacked(new AtkAttr(atk), this);
+        shoot();
+
+        //aim.BeAttacked(new AtkAttr(atk), this);
         nowAttackCooldown = atkCooldown;
     }
 
-    void BeAttacked(AtkAttr atkAttr, System.Object fromObj) {
-        hp -= atk;
+    void shoot() {
+        GameObject Bullet = Resources.Load("Prefabs/Bullet") as GameObject;
+        GameObject bullet = GameObject.Instantiate(Bullet);
+        bullet.transform.parent = GameObject.Find("Bullets").transform;
+        bullet.transform.position = tf.position;
+        BulletController bulletCtrl = bullet.GetComponent<BulletController>();
+        bulletCtrl.aim = aim.gameObject;
+        bulletCtrl.atkAttr = new AtkAttr(atk);
+        bulletCtrl.speed = bulletSpeed;
+        bulletCtrl.SetAttr(bulletColor);
+        bulletCtrl.fromObj = this.gameObject;
+    }
+
+    public void BeAttacked(AtkAttr atkAttr, System.Object fromObj) {
+        hp -= atkAttr.atk;
         Update2DObj();
         if (hp <= 0) {
             Destroy(hpBar.gameObject);
