@@ -4,6 +4,7 @@
 using UnityEngine.UI;
 
 using System.Collections;
+using System;
 
 public class PlayerController : MonoBehaviour {
 	
@@ -62,7 +63,7 @@ public class PlayerController : MonoBehaviour {
 
 			// Run the 'SetCountText()' function (see below)
 			SetCountText ();
-		}
+        }
 	}
 
 	// Create a standalone function that can update the 'countText' UI and check if the required amount to win has been achieved
