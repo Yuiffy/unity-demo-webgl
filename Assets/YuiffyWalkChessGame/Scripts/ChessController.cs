@@ -231,7 +231,7 @@ public class ChessController : MonoBehaviour
     }
 
     void Update2DObj() {
-        Vector2 pos2d = RectTransformUtility.WorldToScreenPoint(GameObject.Find("Main Camera").GetComponent<Camera>(), tf.position + new Vector3(0,0.8f,0));
+        Vector2 pos2d = RectTransformUtility.WorldToScreenPoint(GameObject.Find("Main Camera").GetComponent<Camera>(), tf.position + new Vector3(0,1.5f,0));
         hpBar.transform.position = pos2d;
         hpBar.GetComponent<Image>().fillAmount = 1.0f*hp/maxHp;
     }
