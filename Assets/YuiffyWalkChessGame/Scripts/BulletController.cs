@@ -43,6 +43,7 @@ public class BulletController : MonoBehaviour
     void FixedUpdate()
     {
         Vector3 aimVelo = rb.velocity;
+        if (aimVelo.magnitude<=0.1) aimVelo += new Vector3(0,100,0);
         if (!aim || !aim.gameObject)
         {
             Destroy(this.gameObject, 5.0f);
@@ -62,7 +63,7 @@ public class BulletController : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         // ..and if the game object we intersect has the tag 'Pick Up' assigned to it..
-        Debug.Log("face:"+ other);
+        //Debug.Log("face:"+ other);
         if (other.gameObject == aim)
         {
             ChessController aimChess = other.gameObject.GetComponent<ChessController>();

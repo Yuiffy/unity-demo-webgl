@@ -214,7 +214,9 @@ public class ChessController : MonoBehaviour
         bullet.transform.parent = GameObject.Find("Bullets").transform;
         bullet.transform.position = tf.position;
         BulletController bulletCtrl = bullet.GetComponent<BulletController>();
-        bulletCtrl.aim = aim.gameObject;
+        if (aim && aim.gameObject) {
+            bulletCtrl.aim = aim.gameObject;
+        }
         bulletCtrl.atkAttr = new AtkAttr(atk);
         bulletCtrl.speed = bulletSpeed;
         bulletCtrl.SetAttr(bulletColor);
