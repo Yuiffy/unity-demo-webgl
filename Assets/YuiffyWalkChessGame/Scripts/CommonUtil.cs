@@ -15,4 +15,11 @@ static public class CommonUtil
             atk = _atk;
         }
     }
+
+    public enum ChessState {
+    MANAGE,
+    BATTLE,
+    JUMPING,
+    ATTACKING
+};
 }

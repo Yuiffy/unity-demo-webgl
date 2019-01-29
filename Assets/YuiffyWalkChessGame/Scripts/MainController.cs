@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MainController : MonoBehaviour
 {
-    public static Plane BOARD_CHESS_PLAIN = new Plane(Vector3.up, Vector3.up * 0.33f);
+    public static Plane BOARD_CHESS_PLAIN = new Plane(Vector3.up * 10f, Vector3.up * 1.33f);
     public int layerMask = 1 << 8;  //第8layer是棋在的layer
     public enum MOUSE_STATE
     {
@@ -41,10 +41,15 @@ public class MainController : MonoBehaviour
 
                     if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
                     {
-                        oldHitObj = hit.transform.gameObject;
-                        mouseState = MOUSE_STATE.DRAGING;
+                        GameObject hitObj = hit.transform.gameObject;
+                        ChessController chess = hitObj.GetComponent<ChessController>();
+                        CommonUtil.ChessState state = chess.GetState();
+                        if(state==CommonUtil.ChessState.MANAGE){
+                            mouseState = MOUSE_STATE.DRAGING;
+                            oldHitObj = hitObj;
+                        }
                     }
-                    else mouseState = MOUSE_STATE.DRAG_NOTHING;
+                    if(mouseState!=MOUSE_STATE.DRAGING) mouseState = MOUSE_STATE.DRAG_NOTHING;
                 }
                 else
                 {

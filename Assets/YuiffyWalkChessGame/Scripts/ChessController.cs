@@ -5,12 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using static CommonUtil;
 
-enum ChessState {
-    MANAGE,
-    BATTLE,
-    JUMPING,
-    ATTACKING
-};
+
 
 public class ChessController : MonoBehaviour
 {
@@ -36,7 +31,7 @@ public class ChessController : MonoBehaviour
     private Transform tf;
 
     private ChessController aim;
-    private ChessState state = ChessState.BATTLE;
+    public ChessState state = ChessState.BATTLE;
     private BattleUnitAttr attr;
 
     private Vector2Int jumpingTo;
@@ -237,4 +232,6 @@ public class ChessController : MonoBehaviour
         hpBar.transform.position = pos2d;
         hpBar.GetComponent<Image>().fillAmount = 1.0f*hp/maxHp;
     }
+
+    public ChessState GetState() => state;
 }
