@@ -4,10 +4,18 @@ using UnityEngine;
 
 public class MainController : MonoBehaviour
 {
+    public static Plane BOARD_CHESS_PLAIN = new Plane(Vector3.up, Vector3.up * 0.33f);
+    public int layerMask = 1 << 8;  //第8layer是棋在的layer
+    public enum MOUSE_STATE
+    {
+        DRAGING,
+        DRAG_NOTHING,
+        NORMAL
+    };
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     void FixedUpdate()
@@ -17,6 +25,7 @@ public class MainController : MonoBehaviour
 
     Vector3 oldMouse;
     GameObject oldHitObj;
+    MOUSE_STATE mouseState = MOUSE_STATE.NORMAL;
 
     //这里是使用Ray射线来控制物体移动，可是由于射线本身检测速率的限制，并不适合持续的跟踪移动。具体效果各位读者试试便知。
     private void RayMove()
@@ -25,23 +34,39 @@ public class MainController : MonoBehaviour
         RaycastHit hit;
         if (Input.GetMouseButton(0))
         {
-            if (Physics.Raycast(ray, out hit))
+            if (!oldHitObj)
             {
+                if (mouseState == MOUSE_STATE.NORMAL)
+                {
+
+                    if (Physics.Raycast(ray, out hit, Mathf.Infinity, layerMask))
+                    {
+                        oldHitObj = hit.transform.gameObject;
+                        mouseState = MOUSE_STATE.DRAGING;
+                    }
+                    else mouseState = MOUSE_STATE.DRAG_NOTHING;
+                }
+                else
+                {
+                    //is drag nothing
+                }
                 // Vector3 offset = Input.mousePosition;
                 // hit.transform.position = new Vector3(hit.point.x, hit.point.y, hit.transform.position.z);
-                if (oldHitObj)
-                {
-                    oldHitObj.transform.position += hit.point - oldMouse;
-                }
-                else {
-                    oldHitObj = hit.transform.gameObject;
-                }
                 // Debug.DrawLine(ray.origin, hit.point);
             }
-            oldMouse = hit.point;
+            else
+            {
+                float enter;
+                bool banana = BOARD_CHESS_PLAIN.Raycast(ray, out enter);
+                Vector3 point = ray.GetPoint(enter);
+                oldHitObj.transform.position = point;
+            }
+            // oldMouse = hit.point;
         }
-        else {
+        else
+        {
             oldHitObj = null;
+            mouseState = MOUSE_STATE.NORMAL;
         }
 
 
