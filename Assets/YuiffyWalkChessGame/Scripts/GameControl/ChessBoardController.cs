@@ -10,7 +10,8 @@ namespace MyGameController
     {
         public int xMax;
         public int yMax;
-        public ChessController[] chesses;
+        public List<ChessController> chesses;
+        private List<GameObject> chessesBackup = new List<GameObject>();
         public float edgeWidth;
 
         private Transform tf;
@@ -110,6 +111,54 @@ namespace MyGameController
                 }
             }
             return new Vector2Int();//不懂怎样返回null
+        }
+
+        public bool IsInBoard(int x,int y) {
+            return x >= 0 && x < xMax && y >= 0 && y < yMax;
+        }
+
+        public void ReadyBattle() {
+            chessesBackup = new List<GameObject>();
+            foreach (ChessController chess in chesses)
+            {
+                if (IsInBoard(chess.x, chess.y))
+                {
+                    GameObject copyChess = Instantiate<GameObject>(chess.transform.gameObject, chess.transform.position, chess.transform.rotation);
+                    copyChess.transform.parent = GameObject.Find("Chesses").transform;
+                    copyChess.SetActive(false);
+                    chessesBackup.Add(copyChess);
+                    chess.state = MyUtil.CommonUtil.ChessState.READY;
+                }
+            }
+        }
+
+        public void StartBattle()
+        {
+            foreach (ChessController chess in chesses)
+            {
+                if (chess.state == MyUtil.CommonUtil.ChessState.READY)
+                {
+                    chess.state = MyUtil.CommonUtil.ChessState.BATTLE;
+                }
+            }
+        }
+
+        public void StopBattle()
+        {
+            List<ChessController> newChess = new List<ChessController>();
+            foreach (GameObject chessObj in chessesBackup)
+            {
+                chessObj.SetActive(true);
+                newChess.Add(chessObj.GetComponent<ChessController>());
+            }
+            foreach (ChessController chess in chesses)
+            {
+                if (chess == null) continue;
+                if (chess.gameObject && chess.state != MyUtil.CommonUtil.ChessState.BATTLE) newChess.Add(chess);
+                else chess.DestroySelf();
+            }
+            Debug.Log(chesses.Count+","+ newChess.Count);
+            chesses = newChess;
         }
     }
 }

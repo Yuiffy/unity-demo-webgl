@@ -162,7 +162,7 @@ namespace MyGameObject
         void SearchAim()
         {
             aim = null;
-            ChessController[] chesses = board.chesses;
+            List<ChessController> chesses = board.chesses;
             foreach (ChessController chess in chesses)
             {
                 if (chess && chess.gameObject && chess.team == enemyTeam && chess.state != ChessState.MANAGE)
@@ -272,8 +272,7 @@ namespace MyGameObject
             Update2DObj();
             if (hp <= 0)
             {
-                Destroy(hpBar.gameObject);
-                Destroy(this.gameObject);
+                DestroySelf();
             }
         }
 
@@ -285,6 +284,11 @@ namespace MyGameObject
         }
 
         public ChessState GetState() => state;
+
+        public void DestroySelf() {
+            Destroy(hpBar.gameObject);
+            Destroy(this.gameObject);
+        }
     }
 }
 

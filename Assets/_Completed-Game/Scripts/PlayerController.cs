@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 using System.Collections;
 using System;
+using MyGameController;
 
 public class PlayerController : MonoBehaviour {
 	
@@ -27,7 +28,7 @@ public class PlayerController : MonoBehaviour {
 		count = 0;
 
 		// Run the SetCountText function to update the UI (see below)
-		SetCountText ();
+		SetCountText ("MANAGE");
 
 		// Set the text property of our Win Text UI to an empty string, making the 'You Win' (game over message) blank
 		winText.text = "";
@@ -60,17 +61,33 @@ public class PlayerController : MonoBehaviour {
 
 			// Add one to the score variable 'count'
 			count = count + 1;
+            string ext = "";
+            ChessBoardController board = GameObject.Find("Ground").GetComponent<ChessBoardController>();
+            if (count % 3 == 1) {
+                board.ReadyBattle();
+                ext = "READY";
+            }
+            if (count % 3 == 2)
+            {
+                board.StartBattle();
+                ext = "BATTLE";
+            }
+            if (count % 3 == 0)
+            {
+                ext = "MANAGE";
+                board.StopBattle();
+            }
 
-			// Run the 'SetCountText()' function (see below)
-			SetCountText ();
+            // Run the 'SetCountText()' function (see below)
+            SetCountText (ext);
         }
 	}
 
 	// Create a standalone function that can update the 'countText' UI and check if the required amount to win has been achieved
-	void SetCountText()
+	void SetCountText(string ext)
 	{
 		// Update the text field of our 'countText' variable
-		countText.text = "Count: " + count.ToString ();
+		countText.text = ext+" Count: " + count.ToString ();
 
 		// Check if our 'count' is equal to or exceeded 12
 		if (count >= 12) 

@@ -21,7 +21,8 @@ static public class CommonUtil
     MANAGE,
     BATTLE,
     JUMPING,
-    ATTACKING
+    ATTACKING,
+    READY
 };
 }
 }
