@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEditor;
+namespace MyUtil{
 
 static public class CommonUtil
 {
@@ -22,4 +23,5 @@ static public class CommonUtil
     JUMPING,
     ATTACKING
 };
+}
 }

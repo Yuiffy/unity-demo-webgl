@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyGameObject;
 using UnityEngine;
-
+namespace MyGameController{
 public class ChessBoardController : MonoBehaviour
 {
     public int xMax;
@@ -45,4 +46,5 @@ public class ChessBoardController : MonoBehaviour
     public float GetBlockRange() {
         return Math.Max(xBlockRange, yBlockRange);
     }
+}
 }

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyEntity;
+using MyGameController;
+using MyUtil;
 using UnityEngine;
 using UnityEngine.UI;
-using static CommonUtil;
+using static MyUtil.CommonUtil;
 
-
-
+namespace MyGameObject{
 public class ChessController : MonoBehaviour
 {
     public int x;
@@ -168,7 +170,7 @@ public class ChessController : MonoBehaviour
         y = jumpingTo.y;
         Vector3 pos = board.GetChessPosition(x, y);
         tf.SetPositionAndRotation(pos, tf.rotation);
-        jumpingCooldown = CommonUtil.DEFAULT_JUMP_COOLDOWN;
+        jumpingCooldown = DEFAULT_JUMP_COOLDOWN;
     }
 
     Vector2Int findPathNextBlock() {
@@ -235,3 +237,5 @@ public class ChessController : MonoBehaviour
 
     public ChessState GetState() => state;
 }
+}
+

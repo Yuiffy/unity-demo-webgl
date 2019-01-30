@@ -1,8 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MyUtil;
+using MyGameObject;
 
-public class MainController : MonoBehaviour
+public class LocalPlayerController : MonoBehaviour
 {
     public static Plane BOARD_CHESS_PLAIN = new Plane(Vector3.up * 10f, Vector3.up * 1.33f);
     public int layerMask = 1 << 8;  //第8layer是棋在的layer
