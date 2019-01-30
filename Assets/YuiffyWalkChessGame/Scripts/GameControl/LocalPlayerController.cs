@@ -7,6 +7,7 @@ using MyGameObject;
 public class LocalPlayerController : MonoBehaviour
 {
     public static Plane BOARD_CHESS_PLAIN = new Plane(Vector3.up * 10f, Vector3.up * 1.33f);
+    public int team = 0;
     public int layerMask = 1 << 8;  //第8layer是棋在的layer
     public enum MOUSE_STATE
     {
@@ -29,7 +30,7 @@ public class LocalPlayerController : MonoBehaviour
     GameObject oldHitObj;
     MOUSE_STATE mouseState = MOUSE_STATE.NORMAL;
 
-    //这里是使用Ray射线来控制物体移动，可是由于射线本身检测速率的限制，并不适合持续的跟踪移动。具体效果各位读者试试便知。
+    //这里是使用Ray射线来控制物体移动。
     private void RayMove()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -46,12 +47,14 @@ public class LocalPlayerController : MonoBehaviour
                         GameObject hitObj = hit.transform.gameObject;
                         ChessController chess = hitObj.GetComponent<ChessController>();
                         CommonUtil.ChessState state = chess.GetState();
-                        if(state==CommonUtil.ChessState.MANAGE){
+                        int chessTeam = chess.team;
+                        if (state == CommonUtil.ChessState.MANAGE && chessTeam == team)
+                        {
                             mouseState = MOUSE_STATE.DRAGING;
                             oldHitObj = hitObj;
                         }
                     }
-                    if(mouseState!=MOUSE_STATE.DRAGING) mouseState = MOUSE_STATE.DRAG_NOTHING;
+                    if (mouseState != MOUSE_STATE.DRAGING) mouseState = MOUSE_STATE.DRAG_NOTHING;
                 }
                 else
                 {
@@ -72,7 +75,12 @@ public class LocalPlayerController : MonoBehaviour
         }
         else
         {
-            oldHitObj = null;
+            if (oldHitObj)
+            {
+                ChessController chess = oldHitObj.GetComponent<ChessController>();
+                chess.NearBySitDown();
+                oldHitObj = null;
+            }
             mouseState = MOUSE_STATE.NORMAL;
         }
 

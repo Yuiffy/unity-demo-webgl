@@ -46,5 +46,12 @@ public class ChessBoardController : MonoBehaviour
     public float GetBlockRange() {
         return Math.Max(xBlockRange, yBlockRange);
     }
+
+    public Vector2Int GetNearestPosition(Vector3 pos){
+        Vector3 boardPos = tf.position;
+        int chessXonBoard = (int)Math.Round((pos.x - boardPos.x +realSize.x/2 - edgeWidth)/xBlockRange-0.5);
+        int chessYonBoard = (int)Math.Round((pos.z - boardPos.z +realSize.z/2 - edgeWidth)/yBlockRange-0.5);
+        return new Vector2Int(chessXonBoard, chessYonBoard);
+    }
 }
 }
