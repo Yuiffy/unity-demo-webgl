@@ -17,7 +17,7 @@ namespace MyGameController
         private Vector3 realSize;
         private float xBlockRange;
         private float yBlockRange;
-        private Dictionary<Vector2Int, object> map = new Dictionary<Vector2Int, object>();
+        private Dictionary<int, Dictionary<int, object>> map = new Dictionary<int, Dictionary<int, object>>();
         // Start is called before the first frame update
         void Start()
         {
@@ -67,18 +67,49 @@ namespace MyGameController
 
         private void UpdateMap()
         {
-            map.Clear();
+            foreach (KeyValuePair<int, Dictionary<int, object>> pair in map)
+            {
+                pair.Value.Clear();
+            }
             foreach (ChessController chess in chesses)
             {
-                Vector2Int v2 = new Vector2Int(chess.x, chess.y);
-                if (map.ContainsKey(v2))
-                    map.Add(v2, chess);
+                int x = chess.x;
+                int y = chess.y;
+                if (!map.ContainsKey(x)) map.Add(x, new Dictionary<int, object>());
+                Dictionary<int, object> column = map[x];
+                if (!column.ContainsKey(y))
+                    column.Add(y, chess);
                 else
                 {
-                    Debug.Log("已经有棋子在"+v2+chess);
+                    Debug.Log("已经有棋子在"+x+","+y+chess);
                 }
                 // map[x][y] = chess;
             }
+        }
+
+        public bool IsChessOnPosition(int x, int y) {
+            if (map.ContainsKey(x) && map[x].ContainsKey(y))
+            {
+                return true;
+            }
+            else return false;
+        }
+
+        private static Vector2Int[] goArr = { new Vector2Int(1,0), new Vector2Int(-1,0), new Vector2Int(0,1), new Vector2Int(0,-1) };
+
+        public Vector2Int FindNearestEmptyPosition(int x, int y, int type=0) {
+            Queue<Vector2Int> queue = new Queue<Vector2Int>();
+            queue.Enqueue(new Vector2Int(x,y));
+            while (queue.Count > 0) {
+                Vector2Int now = queue.Dequeue();
+                if (!IsChessOnPosition(now.x, now.y)) return new Vector2Int(now.x, now.y);
+                foreach (Vector2Int go in goArr)
+                {
+                    Vector2Int next = now + go;
+                    if (!queue.Contains(next)) queue.Enqueue(next);
+                }
+            }
+            return new Vector2Int();//不懂怎样返回null
         }
     }
 }

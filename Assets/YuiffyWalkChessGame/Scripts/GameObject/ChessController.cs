@@ -37,7 +37,7 @@ namespace MyGameObject
         public ChessState state = ChessState.BATTLE;
         private BattleUnitAttr attr;
 
-        private Vector2Int jumpingTo;
+        private Vector2Int jumpingFrom;
         private float jumpingTimeCost = 0.0f;
 
         private float jumpingCooldown = 0.0f;
@@ -130,7 +130,7 @@ namespace MyGameObject
                         }
                         else
                         {
-                            Vector3 newPos = Vector3.Lerp(board.GetChessPosition(x, y), board.GetChessPosition(jumpingTo.x, jumpingTo.y), jumpingProgress);
+                            Vector3 newPos = Vector3.Lerp(board.GetChessPosition(jumpingFrom.x, jumpingFrom.y), board.GetChessPosition(x, y), jumpingProgress);
                             //Debug.Log("newPos="+newPos);
                             tf.SetPositionAndRotation(newPos, tf.rotation);
                         }
@@ -165,7 +165,7 @@ namespace MyGameObject
             ChessController[] chesses = board.chesses;
             foreach (ChessController chess in chesses)
             {
-                if (chess && chess.gameObject && chess.team == enemyTeam)
+                if (chess && chess.gameObject && chess.team == enemyTeam && chess.state != ChessState.MANAGE)
                 {
                     aim = chess;
                     break;
@@ -180,7 +180,11 @@ namespace MyGameObject
 
         void StartWalk()
         {
-            jumpingTo = findPathNextBlock();
+            Vector2Int want = FindPathNextBlock();
+            Vector2Int next = board.FindNearestEmptyPosition(want.x, want.y);//TODO:用广搜找路
+            jumpingFrom = new Vector2Int(x,y);
+            x = next.x;
+            y = next.y;
             SetState(ChessState.JUMPING);
             jumpingTimeCost = 0.0f;
         }
@@ -196,19 +200,20 @@ namespace MyGameObject
         void SitDownWhenBattle()
         {
             SetState(ChessState.BATTLE);
-            SitDown(jumpingTo.x, jumpingTo.y);
+            SitDown(x, y);
             jumpingCooldown = DEFAULT_JUMP_COOLDOWN;
         }
 
         public void NearBySitDown()
         {
             Vector3 pos = tf.position;
-            Vector2Int vec2 = board.GetNearestPosition(pos);
-            Debug.Log("Chess Sit Down By Mouse" + vec2+pos);
-            SitDown(vec2.x, vec2.y);
+            Vector2Int selectBlock = board.GetNearestPosition(pos);
+            Vector2Int sitBlock = board.FindNearestEmptyPosition(selectBlock.x, selectBlock.y);
+            Debug.Log("Chess Sit Down By Mouse" + sitBlock + pos);
+            SitDown(sitBlock.x, sitBlock.y);
         }
 
-        Vector2Int findPathNextBlock()
+        Vector2Int FindPathNextBlock()
         {
             int xMore = aim.x - x;
             int yMore = aim.y - y;
