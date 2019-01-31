@@ -1,28 +1,36 @@
 ﻿using UnityEngine;
 using UnityEditor;
-namespace MyUtil{
-
-static public class CommonUtil
+namespace MyUtil
 {
-    static public float DEFAULT_JUMP_COOLDOWN = 0.5f;
 
-    public class AtkAttr
+    static public class CommonUtil
     {
-        public int atk;
-        public int type;//TODO: 做成enum
-        //TODO: 增加更多东西？
-        public AtkAttr(int _atk)
-        {
-            atk = _atk;
-        }
-    }
+        static public float DEFAULT_JUMP_COOLDOWN = 0.5f;
 
-    public enum ChessState {
-    MANAGE,
-    BATTLE,
-    JUMPING,
-    ATTACKING,
-    READY
-};
-}
+        public class AtkAttr
+        {
+            public int atk;
+            public int type;//TODO: 做成enum
+                            //TODO: 增加更多东西？
+            public AtkAttr(int _atk)
+            {
+                atk = _atk;
+            }
+        }
+
+        public enum ChessState
+        {
+            MANAGE,
+            BATTLE,
+            JUMPING,
+            ATTACKING,
+            READY
+        };
+
+        public enum GameFlowState{
+            MANAGE,
+            BATTLE,
+            READY
+        };
+    }
 }

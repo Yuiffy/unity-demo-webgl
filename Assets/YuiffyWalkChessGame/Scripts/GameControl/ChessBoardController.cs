@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using MyGameObject;
 using UnityEngine;
+using static MyUtil.CommonUtil;
 
 namespace MyGameController
 {
@@ -82,13 +83,14 @@ namespace MyGameController
                     column.Add(y, chess);
                 else
                 {
-                    Debug.Log("已经有棋子在"+x+","+y+chess);
+                    Debug.Log("已经有棋子在" + x + "," + y + chess);
                 }
                 // map[x][y] = chess;
             }
         }
 
-        public bool IsChessOnPosition(int x, int y) {
+        public bool IsChessOnPosition(int x, int y)
+        {
             if (map.ContainsKey(x) && map[x].ContainsKey(y))
             {
                 return true;
@@ -96,12 +98,14 @@ namespace MyGameController
             else return false;
         }
 
-        private static Vector2Int[] goArr = { new Vector2Int(1,0), new Vector2Int(-1,0), new Vector2Int(0,1), new Vector2Int(0,-1) };
+        private static Vector2Int[] goArr = { new Vector2Int(1, 0), new Vector2Int(-1, 0), new Vector2Int(0, 1), new Vector2Int(0, -1) };
 
-        public Vector2Int FindNearestEmptyPosition(int x, int y, int type=0) {
+        public Vector2Int FindNearestEmptyPosition(int x, int y, int type = 0)
+        {
             Queue<Vector2Int> queue = new Queue<Vector2Int>();
-            queue.Enqueue(new Vector2Int(x,y));
-            while (queue.Count > 0) {
+            queue.Enqueue(new Vector2Int(x, y));
+            while (queue.Count > 0)
+            {
                 Vector2Int now = queue.Dequeue();
                 if (!IsChessOnPosition(now.x, now.y)) return new Vector2Int(now.x, now.y);
                 foreach (Vector2Int go in goArr)
@@ -113,11 +117,13 @@ namespace MyGameController
             return new Vector2Int();//不懂怎样返回null
         }
 
-        public bool IsInBoard(int x,int y) {
+        public bool IsInBoard(int x, int y)
+        {
             return x >= 0 && x < xMax && y >= 0 && y < yMax;
         }
 
-        public void ReadyBattle() {
+        public void ReadyBattle()
+        {
             chessesBackup = new List<GameObject>();
             foreach (ChessController chess in chesses)
             {
@@ -161,8 +167,24 @@ namespace MyGameController
                 if (chess.gameObject && chess.state == MyUtil.CommonUtil.ChessState.MANAGE) newChess.Add(chess);
                 else chess.DestroySelf();
             }
-            Debug.Log(chesses.Count+","+ newChess.Count);
+            Debug.Log(chesses.Count + "," + newChess.Count);
             chesses = newChess;
+        }
+
+        public void SetState(GameFlowState _state)
+        {
+            switch (_state)
+            {
+                case GameFlowState.MANAGE:
+                    StopBattle();
+                    break;
+                case GameFlowState.READY:
+                    ReadyBattle();
+                    break;
+                case GameFlowState.BATTLE:
+                    StartBattle();
+                    break;
+            }
         }
     }
 }
