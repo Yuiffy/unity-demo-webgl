@@ -146,15 +146,19 @@ namespace MyGameController
         public void StopBattle()
         {
             List<ChessController> newChess = new List<ChessController>();
+            //添加备份棋子
             foreach (GameObject chessObj in chessesBackup)
             {
                 chessObj.SetActive(true);
-                newChess.Add(chessObj.GetComponent<ChessController>());
+                ChessController chess = chessObj.GetComponent<ChessController>();
+                chess.Init(this);
+                newChess.Add(chess);
             }
+            //添加未战斗棋子，删除战斗棋子
             foreach (ChessController chess in chesses)
             {
                 if (chess == null) continue;
-                if (chess.gameObject && chess.state != MyUtil.CommonUtil.ChessState.BATTLE) newChess.Add(chess);
+                if (chess.gameObject && chess.state == MyUtil.CommonUtil.ChessState.MANAGE) newChess.Add(chess);
                 else chess.DestroySelf();
             }
             Debug.Log(chesses.Count+","+ newChess.Count);

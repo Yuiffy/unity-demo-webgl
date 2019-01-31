@@ -31,7 +31,6 @@ namespace MyGameObject
         private int hp;
 
         private ChessBoardController board;
-        private Transform tf;
 
         private ChessController aim;
         public ChessState state = ChessState.BATTLE;
@@ -54,19 +53,23 @@ namespace MyGameObject
 
         public void BoardReady(ChessBoardController _board)
         {
+            Init(_board);
+            Vector3 pos = _board.GetChessPosition(x, y);
+            transform.SetPositionAndRotation(pos, transform.rotation);
+            GetComponent<MeshRenderer>().material.color = chessColor;
+        }
+
+        public void Init(ChessBoardController _board)
+        {
             board = _board;
-            tf = GetComponent<Transform>();
-            Vector3 pos = board.GetChessPosition(x, y);
-            tf.SetPositionAndRotation(pos, tf.rotation);
-            hp = maxHp;
+            GameObject HpBar = Resources.Load("Prefabs/HpBar") as GameObject;
             attr = new BattleUnitAttr();
             getAttrs();
-            GetComponent<MeshRenderer>().material.color = chessColor;
-            GameObject HpBar = Resources.Load("Prefabs/HpBar") as GameObject;
+            hp = maxHp;
             hpBar = GameObject.Instantiate(HpBar);
             hpBar.transform.parent = GameObject.Find("HpCanvas").transform;
-            SetState(state);
             Update2DObj();
+            SetState(state);
         }
 
         // Update is called once per frame
@@ -91,7 +94,7 @@ namespace MyGameObject
                             SearchAim();
                             if (!aim) return;//没目标就不用动了
                         }
-                        if (Vector3.Distance(tf.position, aim.tf.position) > attr.realAtkRange)
+                        if (Vector3.Distance(transform.position, aim.transform.position) > attr.realAtkRange)
                         {
                             //距离不够，找路跳过去打
                             if (jumpingCooldown > 0.0f)
@@ -102,13 +105,13 @@ namespace MyGameObject
                             else
                             {
                                 StartWalk();
-                                // Debug.Log("Start Walk!" + tf.position + "," + aim.tf.position + "," + x + y + "," + jumpingTo);
+                                // Debug.Log("Start Walk!" + transform.position + "," + aim.transform.position + "," + x + y + "," + jumpingTo);
                             }
                         }
                         else
                         {
                             //距离够，打
-                            //Debug.Log("Fight!"+tf.position+","+aim.tf.position);
+                            //Debug.Log("Fight!"+transform.position+","+aim.transform.position);
                             if (nowAttackCooldown <= beforeAtkTime)
                             {
                                 StartAttack();
@@ -132,7 +135,7 @@ namespace MyGameObject
                         {
                             Vector3 newPos = Vector3.Lerp(board.GetChessPosition(jumpingFrom.x, jumpingFrom.y), board.GetChessPosition(x, y), jumpingProgress);
                             //Debug.Log("newPos="+newPos);
-                            tf.SetPositionAndRotation(newPos, tf.rotation);
+                            transform.SetPositionAndRotation(newPos, transform.rotation);
                         }
                         Update2DObj();
                         break;
@@ -162,6 +165,7 @@ namespace MyGameObject
         void SearchAim()
         {
             aim = null;
+            Debug.Log("SearchAim" + board);
             List<ChessController> chesses = board.chesses;
             foreach (ChessController chess in chesses)
             {
@@ -182,7 +186,7 @@ namespace MyGameObject
         {
             Vector2Int want = FindPathNextBlock();
             Vector2Int next = board.FindNearestEmptyPosition(want.x, want.y);//TODO:用广搜找路
-            jumpingFrom = new Vector2Int(x,y);
+            jumpingFrom = new Vector2Int(x, y);
             x = next.x;
             y = next.y;
             SetState(ChessState.JUMPING);
@@ -194,7 +198,7 @@ namespace MyGameObject
             x = _x;
             y = _y;
             Vector3 pos = board.GetChessPosition(x, y);
-            tf.SetPositionAndRotation(pos, tf.rotation);
+            transform.SetPositionAndRotation(pos, transform.rotation);
         }
 
         void SitDownWhenBattle()
@@ -206,7 +210,7 @@ namespace MyGameObject
 
         public void NearBySitDown()
         {
-            Vector3 pos = tf.position;
+            Vector3 pos = transform.position;
             Vector2Int selectBlock = board.GetNearestPosition(pos);
             Vector2Int sitBlock = board.FindNearestEmptyPosition(selectBlock.x, selectBlock.y);
             Debug.Log("Chess Sit Down By Mouse" + sitBlock + pos);
@@ -254,7 +258,7 @@ namespace MyGameObject
             GameObject Bullet = Resources.Load("Prefabs/Bullet") as GameObject;
             GameObject bullet = GameObject.Instantiate(Bullet);
             bullet.transform.parent = GameObject.Find("Bullets").transform;
-            bullet.transform.position = tf.position;
+            bullet.transform.position = transform.position;
             BulletController bulletCtrl = bullet.GetComponent<BulletController>();
             if (aim && aim.gameObject)
             {
@@ -278,14 +282,15 @@ namespace MyGameObject
 
         void Update2DObj()
         {
-            Vector2 pos2d = RectTransformUtility.WorldToScreenPoint(GameObject.Find("Main Camera").GetComponent<Camera>(), tf.position + new Vector3(0, 1.5f, 0));
+            Vector2 pos2d = RectTransformUtility.WorldToScreenPoint(GameObject.Find("Main Camera").GetComponent<Camera>(), transform.position + new Vector3(0, 1.5f, 0));
             hpBar.transform.position = pos2d;
             hpBar.GetComponent<Image>().fillAmount = 1.0f * hp / maxHp;
         }
 
         public ChessState GetState() => state;
 
-        public void DestroySelf() {
+        public void DestroySelf()
+        {
             Destroy(hpBar.gameObject);
             Destroy(this.gameObject);
         }
