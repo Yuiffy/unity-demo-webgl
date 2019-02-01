@@ -33,7 +33,7 @@ namespace MyGameObject
         private ChessBoardController board;
 
         private ChessController aim;
-        public ChessState state = ChessState.BATTLE;
+        public ChessState state = ChessState.FREEZE;
         private BattleUnitAttr attr;
 
         private Vector2Int jumpingFrom;

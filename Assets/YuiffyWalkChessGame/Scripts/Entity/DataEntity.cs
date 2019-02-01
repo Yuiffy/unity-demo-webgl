@@ -8,6 +8,8 @@
         public string name;
         public PlayerType type;
 
+        public int money = 1;
+
         public PlayerInfo () { }
 
         public PlayerInfo (string _name, PlayerType _type) {

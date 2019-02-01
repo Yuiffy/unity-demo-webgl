@@ -96,7 +96,7 @@ namespace Player
                     ext = "现在是即将开始阶段";
                     break;
                 case GameFlowState.BATTLE:
-                    ext = "现在是战斗阶段";
+                    ext = "ima是Battle阶段";
                     break;
             }
             SetCountText(ext);

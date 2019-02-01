@@ -24,7 +24,8 @@ namespace MyUtil
             BATTLE,
             JUMPING,
             ATTACKING,
-            READY
+            READY,
+            FREEZE
         };
 
         public enum GameFlowState{
