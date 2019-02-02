@@ -7,8 +7,8 @@ using System.IO;
 using DataEntity;
 using MyGameController;
 using MyGameObject;
-using Utf8Json;
 using Random = UnityEngine.Random;
+using MyConfig;
 
 public class DataController : MonoBehaviour {
     public List<PlayerInfo> players = new List<PlayerInfo> ();
@@ -16,7 +16,20 @@ public class DataController : MonoBehaviour {
     private List<List<GameObject>> playerShop = new List<List<GameObject>> ();
     public bool onlineMode = false;
     private int playerShopItemCount = 5;
-    void Start () {
+    private string dataAsJson = "{}";
+    string url = Path.Combine(Application.streamingAssetsPath, "Configs/chessData.json");
+    IEnumerator Start () {
+        if (!onlineMode)
+        {
+            using (WWW www = new WWW(url))
+            {
+                yield return www;
+                dataAsJson = www.text;
+            }
+            //yield return GetWWWJson();
+            Debug.Log("get dataAsJson Over"+dataAsJson);
+        }
+
         if (players.Count == 0) {
             PlayerInfo player = new PlayerInfo ("本地主机", PlayerType.LOCAL);
             players.Add (player);
@@ -64,9 +77,9 @@ public class DataController : MonoBehaviour {
         }
     }
 
-    private string gameDataProjectFilePath = "/YuiffyWalkChessGame/Configs/chessData.json";
-    Dictionary<string, dynamic> chessInfoDic;
-    Dictionary<string, dynamic> shopCountInfo;
+
+    Dictionary<string, Chess> chessInfoDic;
+    Dictionary<string, int> shopCountInfo;
     Dictionary<string, GameObject> chessPrefabDic = new Dictionary<string, GameObject> ();
     Dictionary<string, int> shopCount;
 
@@ -82,35 +95,62 @@ public class DataController : MonoBehaviour {
     public delegate void OnPlayerShopsChangeDelegate (List<List<GameObject>> newVal);
     public event OnPlayerShopsChangeDelegate OnPlayerShopsChange;
 
-    private void InitShop () {
-        var gameData = new Dictionary<string, dynamic> ();
-        if (!onlineMode) {
-            string filePath = Application.dataPath + gameDataProjectFilePath;
-
-            if (File.Exists (filePath)) {
-                string dataAsJson = File.ReadAllText (filePath);
-                // JsonValue value = JsonValue.Parse(@"{ ""name"": ""David"" }");
-                gameData = JsonSerializer.Deserialize<dynamic> (dataAsJson);
-                // Debug.Log ("json=" + dataAsJson);
-            } else {
-                Debug.Log ("No Json File!" + filePath);
-            }
-            Debug.Log ("gameData=" + JsonSerializer.PrettyPrint (JsonSerializer.Serialize (gameData)));
-        } else {
-            Debug.Log ("want online but NO ONLINE MODE!");
+    IEnumerator GetWWWJson()
+    {
+        using (WWW www = new WWW(url))
+        {
+            Debug.Log("www json?"+url);
+            dataAsJson = www.text;
+            yield return www;
         }
+    }
 
+    //private string GetJsonStringGameData() {
+    //    dataAsJson = "{}";
+
+    //    if (!onlineMode)
+    //    {
+    //        StartCoroutine(GetWWWJson());//TODO:会不会时序错误啊，这个到底是异步还是同步，感觉是异步啊怎么还能同步跑的很怪。
+    //    }
+    //    else
+    //    {
+    //        Debug.Log("want online but NO ONLINE MODE!");
+    //    }
+    //    return dataAsJson;
+    //}
+
+    private void InitShop () {
+        //var gameData = JsonSerializer.Deserialize<dynamic>(dataAsJson);
+        //object gameData = JsonConvert.DeserializeObject(dataAsJson);
+        //Newtonsoft.Json.Linq.JObject gameData = Newtonsoft.Json.Linq.JToken.Parse(dataAsJson) as dynamic;
+        Debug.Log("will init shop"+ dataAsJson);
+        Config gameData = JsonUtility.FromJson<Config>(dataAsJson);
+        Debug.Log("gameData=" + JsonUtility.ToJson(gameData));
         //读规则
-        if (gameData.ContainsKey ("rule")) {
-            dynamic rule = gameData["rule"];
-            if (rule.ContainsKey ("playerShopItemCount")) {
-                playerShopItemCount = (int) rule["playerShopItemCount"];
-            }
+        if (gameData.rule!=null) {
+            Rule rule = gameData.rule;
+            playerShopItemCount = rule.playerShopItemCount;
         }
 
         //读棋、店信息
-        chessInfoDic = gameData["chess"];
-        shopCountInfo = gameData["shop"];
+        chessInfoDic = new Dictionary<string, Chess>();
+        shopCountInfo = new Dictionary<string, int>();
+        Chess[] dataChesses = gameData.chess;
+        Debug.Log("chess"+ dataChesses);
+        if (dataChesses == null) Debug.Log("null!");
+        foreach (Chess one in gameData.chess) {
+            Dictionary<string, dynamic> dic = new Dictionary<string, dynamic>();
+            string keyName = one.keyName;
+            chessInfoDic[keyName] = one;
+        }
+
+        foreach (var one in gameData.shop)
+        {
+            Dictionary<string, dynamic> dic = new Dictionary<string, dynamic>();
+            string keyName = one.keyName;
+            shopCountInfo[keyName] = one.count;
+        }
+
         foreach (var chessInfo in chessInfoDic) {
             GameObject chessPrefab = GenerateChessPrefab (chessInfo.Key, chessInfo.Value);
             chessPrefabDic.Add (chessInfo.Key, chessPrefab);
@@ -183,18 +223,18 @@ public class DataController : MonoBehaviour {
         return ret;
     }
 
-    private GameObject GenerateChessPrefab (string keyName, dynamic data) {
+    private GameObject GenerateChessPrefab (string keyName, Chess data) {
         GameObject templatePrefab = Resources.Load ("Prefabs/Chess") as GameObject;
         GameObject prefab = Instantiate (templatePrefab);
         ChessController chessCtrl = prefab.GetComponent<ChessController> ();
         chessCtrl.keyName = keyName;
         chessCtrl.data = data;
-        if (data.ContainsKey ("atk")) chessCtrl.atk = (int) data["atk"];
-        if (data.ContainsKey ("hp")) chessCtrl.maxHp = (int) data["hp"];
-        if (data.ContainsKey ("ui")) {
-            dynamic ui = data["ui"];
-            if (ui.ContainsKey ("color")) {
-                dynamic colorInfo = ui["color"];
+        chessCtrl.atk = data.atk;
+        chessCtrl.maxHp = data.hp;
+        if (data.ui != null) {
+            Ui ui = data.ui;
+            if (ui.color != null) {
+                string colorInfo = ui.color;
                 Color color = new Color ();
                 switch (colorInfo) {
                     case "white":
@@ -206,7 +246,7 @@ public class DataController : MonoBehaviour {
                 }
                 chessCtrl.chessColor = color;
             }
-            if (ui.ContainsKey ("name")) chessCtrl.name = ui["name"];
+            if (ui.name!=null) chessCtrl.name = ui.name;
         }
         //TODO:...
         return prefab;
