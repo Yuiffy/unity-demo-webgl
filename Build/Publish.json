@@ -1,9 +1,7 @@
 {
-"companyName": "DefaultCompany",
-"productName": "New Unity Project",
+"companyName": "YuiffyGame",
+"productName": "Walk Self Mahjong",
 "dataUrl": "Publish.data.unityweb",
-"wasmCodeUrl": "Publish.wasm.code.unityweb",
-"wasmFrameworkUrl": "Publish.wasm.framework.unityweb",
 "asmCodeUrl": "Publish.asm.code.unityweb",
 "asmMemoryUrl": "Publish.asm.memory.unityweb",
 "asmFrameworkUrl": "Publish.asm.framework.unityweb",
