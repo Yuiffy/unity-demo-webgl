@@ -1,0 +1,37 @@
+{
+  "chess": [
+    {
+      "keyName": "horseHead",
+      "hp": 500,
+      "atk": 50,
+      "ui": {
+        "color": "white",
+        "name": "马头",
+        "headText": "Ma"
+      }
+    },
+    {
+      "keyName": "capsule",
+      "hp": 200,
+      "atk": 100,
+      "ui": {
+        "color": "yellow",
+        "name": "药丸",
+        "headText": "Yw"
+      }
+    }
+  ],
+  "shop": [
+    {
+      "keyName": "horseHead",
+      "count": 100
+    },
+    {
+      "keyName": "capsule",
+      "count": 100
+    }
+  ],
+  "rule": {
+    "playerShopItemCount": 5
+  }
+}
