@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DataEntity;
 using MyGameObject;
 using MyUtil;
+using unity_demo_webgl.Assets.YuiffyWalkChessGame.Scripts.GameControl;
 using UnityEngine;
 
 public class LocalPlayerController : MonoBehaviour {
@@ -40,6 +41,10 @@ public class LocalPlayerController : MonoBehaviour {
             UpdateLocalPlayerShop (dataCtrl.PlayerShop);
             dataCtrl.OnPlayerShopsChange += PlayerShopsChangeHandler;
         }
+
+        DisplayController displayCtrl = GetComponent<DisplayController>();
+        displayCtrl.DataReady(dataController);
+        Debug.Log("LocalPlayerCtrl dataready over");
     }
 
     void FixedUpdate () {

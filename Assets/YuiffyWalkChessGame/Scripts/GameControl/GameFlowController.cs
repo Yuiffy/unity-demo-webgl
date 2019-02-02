@@ -62,8 +62,15 @@ public class GameFlowController : MonoBehaviour {
         player.SetState (state);
     }
 
-    private void BattleOverHandler (ChessBoardController board) {
+    private void BattleOverHandler (ChessBoardController board, int hpChange) {
         Debug.Log ("Battle Over Handler:" + unfinishGroundCount + "," + board.ownerTeam);
+        if(hpChange!=0){
+            int owner = board.ownerTeam;
+            int enemy = board.enemyTeam;
+
+            dataController.PlayerHpChange(owner, hpChange);
+            // dataController.PlayerHpChange(enemy, -hpChange); //吸血模式
+        }
         if (unfinishGroundCount > 0) {
             unfinishGroundCount--;
             if (unfinishGroundCount <= 0) {

@@ -33,7 +33,8 @@ public class DataController : MonoBehaviour {
         LocalPlayerController localPlayerCtrl = this.gameObject.GetComponent<LocalPlayerController> ();
         GameFlowController flowCtrl = GetComponent<GameFlowController> ();
         localPlayerCtrl.DataReady (this);
-        flowCtrl.DataReady(this);
+        flowCtrl.DataReady (this);
+        Debug.Log("Data Controller Start over");
     }
 
     // Update is called once per frame
@@ -233,5 +234,14 @@ public class DataController : MonoBehaviour {
             boards[i].enemyTeam = (i + boards.Count - 1) % boards.Count;
         }
         //TODO: 随机分配
+    }
+
+    public delegate void OnPlayerHpChangeDelegate (List<PlayerInfo> players);
+    public event OnPlayerHpChangeDelegate OnPlayerHpChange;
+
+    public void PlayerHpChange (int playerIndex, int hpChange) {
+        Debug.Log ("Hp change" + playerIndex + "," + hpChange);
+        players[playerIndex].hp += hpChange;
+        OnPlayerHpChange (players);
     }
 }

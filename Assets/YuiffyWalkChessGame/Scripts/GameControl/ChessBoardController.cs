@@ -224,7 +224,7 @@ namespace MyGameController {
                 }
             }
         }
-        public delegate void OnBattleOverDelegate (ChessBoardController board);
+        public delegate void OnBattleOverDelegate (ChessBoardController board, int hpChange);
         public event OnBattleOverDelegate OnBattleOver;
         public void BattleOver (bool win) {
             Debug.Log ("BattleOver" + win + "," + weCount + "," + enemyCount);
@@ -234,10 +234,8 @@ namespace MyGameController {
                     chess.state = ChessState.FREEZE;
                 }
             }
-            OnBattleOver (this);
+            OnBattleOver (this, -enemyCount);
             OnBattleOver = null;
-            //TODO: 通知DataController扣血，显示结果
-            // StopBattle ();//等所有玩家战斗完了才结束
         }
     }
 }
