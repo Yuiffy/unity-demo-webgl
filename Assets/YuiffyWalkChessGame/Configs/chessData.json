@@ -3,7 +3,7 @@
         "horseHead": {
             "hp": 500,
             "atk": 50,
-            "model": {
+            "ui": {
                 "color": "white",
                 "name": "马头",
                 "headText":"Ma"
@@ -11,7 +11,7 @@
         },
         "capsule": {
             "hp": 200,
-            "model":{
+            "ui":{
                 "color": "yellow",
                 "name":"药丸",
                 "headText":"Yw"
@@ -21,5 +21,8 @@
     "shop": {
         "horseHead": 100,
         "capsule": 100
+    },
+    "rule":{
+        "playerShopItemCount": 5
     }
 }

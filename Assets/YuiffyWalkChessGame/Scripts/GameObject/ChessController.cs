@@ -12,6 +12,7 @@ namespace MyGameObject
 {
     public class ChessController : MonoBehaviour
     {
+        public string keyName="unknown";
         public int x;
         public int y;
         public int atk = 50;
@@ -44,6 +45,8 @@ namespace MyGameObject
 
         private float attackDoingTime = 0.0f;
         private GameObject hpBar;
+
+        public dynamic data = new Dictionary<string, dynamic>();
 
         // Start is called before the first frame update
         void Start()

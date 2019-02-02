@@ -7,8 +7,10 @@ using static MyUtil.CommonUtil;
 
 namespace MyGameController {
     public class ChessBoardController : MonoBehaviour {
-        public int xMax;
-        public int yMax;
+        public int xMin = 0;
+        public int yMin = 0;
+        public int xMax = 8;
+        public int yMax = 8;
         public List<ChessController> chesses;
         private List<GameObject> chessesBackup = new List<GameObject> ();
         public float edgeWidth;
@@ -84,12 +86,31 @@ namespace MyGameController {
 
         private static Vector2Int[] goArr = { new Vector2Int (1, 0), new Vector2Int (-1, 0), new Vector2Int (0, 1), new Vector2Int (0, -1) };
 
-        public Vector2Int FindNearestEmptyPosition (int x, int y, int type = 0) {
+        public enum FindPositionType {
+            ANY,
+            IN_BOARD,
+            OUT_BOARD
+        }
+        public bool IsPositionOk (Vector2Int pos, FindPositionType type) {
+            switch (type) {
+                case FindPositionType.IN_BOARD:
+                    if (pos.x >= xMin && pos.x < xMax && pos.y >= yMin && pos.y < yMax)
+                        return true;
+                    else return false;
+                case FindPositionType.OUT_BOARD:
+                    if (!(pos.x >= xMin && pos.x < xMax && pos.y >= yMin && pos.y < yMax))
+                        return true;
+                    else return false;
+                default:
+                    return true;
+            }
+        }
+        public Vector2Int FindNearestEmptyPosition (int x, int y, FindPositionType type = FindPositionType.ANY) {
             Queue<Vector2Int> queue = new Queue<Vector2Int> ();
             queue.Enqueue (new Vector2Int (x, y));
             while (queue.Count > 0) {
                 Vector2Int now = queue.Dequeue ();
-                if (!IsChessOnPosition (now.x, now.y)) return new Vector2Int (now.x, now.y);
+                if (!IsChessOnPosition (now.x, now.y) && IsPositionOk (now, type)) return new Vector2Int (now.x, now.y);
                 foreach (Vector2Int go in goArr) {
                     Vector2Int next = now + go;
                     if (!queue.Contains (next)) queue.Enqueue (next);
@@ -99,7 +120,7 @@ namespace MyGameController {
         }
 
         public bool IsInBoard (int x, int y) {
-            return x >= 0 && x < xMax && y >= 0 && y < yMax;
+            return IsPositionOk (new Vector2Int (x, y), FindPositionType.IN_BOARD);
         }
 
         public void ReadyBattle () {
@@ -154,6 +175,20 @@ namespace MyGameController {
                     StartBattle ();
                     break;
             }
+        }
+
+        public void PutNewChess (GameObject prefab) {
+            Vector2Int pos = FindNearestEmptyPosition ((xMax + xMin) / 2, (yMax + yMin) / 2, FindPositionType.OUT_BOARD);
+            GameObject newChessObj = Instantiate<GameObject> (prefab);
+            newChessObj.transform.parent = GameObject.Find ("Chesses").transform;
+            ChessController chess = newChessObj.GetComponent<ChessController> ();
+            chess.state = MyUtil.CommonUtil.ChessState.READY;
+            chess.x = pos.x;
+            chess.y = pos.y;
+            chess.state = ChessState.MANAGE;
+            newChessObj.SetActive (true);
+            chess.BoardReady (this);
+            chesses.Add (chess);
         }
     }
 }
