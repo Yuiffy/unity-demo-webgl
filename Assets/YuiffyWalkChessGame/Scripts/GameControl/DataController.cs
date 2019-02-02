@@ -31,7 +31,9 @@ public class DataController : MonoBehaviour {
         }
 
         LocalPlayerController localPlayerCtrl = this.gameObject.GetComponent<LocalPlayerController> ();
+        GameFlowController flowCtrl = GetComponent<GameFlowController> ();
         localPlayerCtrl.DataReady (this);
+        flowCtrl.DataReady(this);
     }
 
     // Update is called once per frame
@@ -49,12 +51,14 @@ public class DataController : MonoBehaviour {
         Vector3 groundSize = GroundPrefab.GetComponent<Renderer> ().bounds.size;
         Vector3 pos = Vector3.zero;
         Vector3 posAdd = new Vector3 (groundSize.x * 1.6f, -10, 15);
-        foreach (PlayerInfo player in players) {
+        for (int i = 0; i < players.Count; i++) {
+            PlayerInfo player = players[i];
             GameObject ground = GameObject.Instantiate (GroundPrefab);
             ground.transform.parent = GameObject.Find ("Grounds").transform;
             ground.transform.position = pos;
             pos += posAdd;
             ChessBoardController board = ground.GetComponent<ChessBoardController> ();
+            board.ownerTeam = i;
             boards.Add (board);
         }
     }
@@ -129,7 +133,7 @@ public class DataController : MonoBehaviour {
         List<string> ranItems = GetRandomChessInShop (count);
         foreach (string itemName in ranItems) {
             onePlayerShop.Add (chessPrefabDic[itemName]);
-            Debug.Log("put random chess to shop "+itemName+","+chessPrefabDic[itemName].name);
+            Debug.Log ("put random chess to shop " + itemName + "," + chessPrefabDic[itemName].name);
             shopCount[itemName]--;
         }
         if (OnPlayerShopsChange != null)
@@ -180,7 +184,7 @@ public class DataController : MonoBehaviour {
 
     private GameObject GenerateChessPrefab (string keyName, dynamic data) {
         GameObject templatePrefab = Resources.Load ("Prefabs/Chess") as GameObject;
-        GameObject prefab = Instantiate(templatePrefab);
+        GameObject prefab = Instantiate (templatePrefab);
         ChessController chessCtrl = prefab.GetComponent<ChessController> ();
         chessCtrl.keyName = keyName;
         chessCtrl.data = data;
@@ -222,5 +226,12 @@ public class DataController : MonoBehaviour {
         PutBackPlayerShopToPool (PlayerShop[playerIndex]);
         PutRandomChessToPlayerShop (PlayerShop[playerIndex], playerShopItemCount);
         Debug.Log ("Refresh over!" + playerIndex);
+    }
+
+    public void ArangeEnemyForBoards () {
+        for (int i = 0; i < boards.Count; i++) {
+            boards[i].enemyTeam = (i + boards.Count - 1) % boards.Count;
+        }
+        //TODO: 随机分配
     }
 }

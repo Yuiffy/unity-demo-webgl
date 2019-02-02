@@ -8,11 +8,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using static MyUtil.CommonUtil;
 
-namespace MyGameObject
-{
-    public class ChessController : MonoBehaviour
-    {
-        public string keyName="unknown";
+namespace MyGameObject {
+    public class ChessController : MonoBehaviour {
+        public string keyName = "unknown";
         public int x;
         public int y;
         public int atk = 50;
@@ -46,81 +44,65 @@ namespace MyGameObject
         private float attackDoingTime = 0.0f;
         private GameObject hpBar;
 
-        public dynamic data = new Dictionary<string, dynamic>();
+        public dynamic data = new Dictionary<string, dynamic> ();
 
         // Start is called before the first frame update
-        void Start()
-        {
+        void Start () {
 
         }
 
-        public void BoardReady(ChessBoardController _board)
-        {
-            Init(_board);
-            Vector3 pos = _board.GetChessPosition(x, y);
-            transform.SetPositionAndRotation(pos, transform.rotation);
-            GetComponent<MeshRenderer>().material.color = chessColor;
+        public void BoardReady (ChessBoardController _board) {
+            Init (_board);
+            Vector3 pos = _board.GetChessPosition (x, y);
+            transform.SetPositionAndRotation (pos, transform.rotation);
+            GetComponent<MeshRenderer> ().material.color = chessColor;
         }
 
-        public void Init(ChessBoardController _board)
-        {
+        public void Init (ChessBoardController _board) {
             board = _board;
-            GameObject HpBar = Resources.Load("Prefabs/HpBar") as GameObject;
-            attr = new BattleUnitAttr();
-            getAttrs();
+            GameObject HpBar = Resources.Load ("Prefabs/HpBar") as GameObject;
+            attr = new BattleUnitAttr ();
+            getAttrs ();
             hp = maxHp;
-            hpBar = GameObject.Instantiate(HpBar);
-            hpBar.transform.parent = GameObject.Find("HpCanvas").transform;
-            Update2DObj();
-            SetState(state);
+            hpBar = GameObject.Instantiate (HpBar);
+            hpBar.transform.parent = GameObject.Find ("HpCanvas").transform;
+            Update2DObj ();
+            SetState (state);
         }
 
         // Update is called once per frame
-        void Update()
-        {
+        void Update () {
 
         }
 
         // Each physics step..
-        void FixedUpdate()
-        {
+        void FixedUpdate () {
             if (nowAttackCooldown > 0.0f) nowAttackCooldown -= Time.deltaTime;
-            switch (state)
-            {
+            switch (state) {
                 case ChessState.BATTLE:
                     {
                         //减少跳跃冷却
                         if (jumpingCooldown > 0.0f) jumpingCooldown -= Time.deltaTime;
                         //没目标就寻找目标
-                        if (!aim || !aim.gameObject)
-                        {
-                            SearchAim();
-                            if (!aim) return;//没目标就不用动了
+                        if (!aim || !aim.gameObject) {
+                            SearchAim ();
+                            if (!aim) return; //没目标就不用动了
                         }
-                        if (Vector3.Distance(transform.position, aim.transform.position) > attr.realAtkRange)
-                        {
+                        if (Vector3.Distance (transform.position, aim.transform.position) > attr.realAtkRange) {
                             //距离不够，找路跳过去打
-                            if (jumpingCooldown > 0.0f)
-                            {
+                            if (jumpingCooldown > 0.0f) {
                                 //跳跃没冷却好，动不了。
                                 //TODO: 可以在这重新寻找目标
-                            }
-                            else
-                            {
-                                StartWalk();
+                            } else {
+                                StartWalk ();
                                 // Debug.Log("Start Walk!" + transform.position + "," + aim.transform.position + "," + x + y + "," + jumpingTo);
                             }
-                        }
-                        else
-                        {
+                        } else {
                             //距离够，打
                             //Debug.Log("Fight!"+transform.position+","+aim.transform.position);
-                            if (nowAttackCooldown <= beforeAtkTime)
-                            {
-                                StartAttack();
-                            }
-                            else
-                            {
+                            if (nowAttackCooldown <= beforeAtkTime) {
+                                StartAttack ();
+                            } else {
                                 //攻击冷却没好，不能攻击
                             }
                         }
@@ -130,25 +112,21 @@ namespace MyGameObject
                     {
                         jumpingTimeCost += Time.deltaTime;
                         float jumpingProgress = jumpingTimeCost * jumpSpeed / 100;
-                        if (jumpingProgress >= 1.0f)
-                        {
-                            SitDownWhenBattle();
-                        }
-                        else
-                        {
-                            Vector3 newPos = Vector3.Lerp(board.GetChessPosition(jumpingFrom.x, jumpingFrom.y), board.GetChessPosition(x, y), jumpingProgress);
+                        if (jumpingProgress >= 1.0f) {
+                            SitDownWhenBattle ();
+                        } else {
+                            Vector3 newPos = Vector3.Lerp (board.GetChessPosition (jumpingFrom.x, jumpingFrom.y), board.GetChessPosition (x, y), jumpingProgress);
                             //Debug.Log("newPos="+newPos);
-                            transform.SetPositionAndRotation(newPos, transform.rotation);
+                            transform.SetPositionAndRotation (newPos, transform.rotation);
                         }
-                        Update2DObj();
+                        Update2DObj ();
                         break;
                     }
                 case ChessState.ATTACKING:
                     {
                         attackDoingTime += Time.deltaTime;
-                        if (attackDoingTime >= beforeAtkTime)
-                        {
-                            DoAttack();
+                        if (attackDoingTime >= beforeAtkTime) {
+                            DoAttack ();
                         }
                         break;
                     }
@@ -157,146 +135,129 @@ namespace MyGameObject
             }
         }
 
-        void SetState(ChessState _state)
-        {
+        void SetState (ChessState _state) {
             state = _state;
             if (state == ChessState.MANAGE)
-                hpBar.SetActive(false);
+                hpBar.SetActive (false);
             else
-                hpBar.SetActive(true);
+                hpBar.SetActive (true);
         }
-        void SearchAim()
-        {
+        void SearchAim () {
             aim = null;
-            Debug.Log("SearchAim" + board);
+            Debug.Log ("SearchAim" + board);
             List<ChessController> chesses = board.chesses;
-            foreach (ChessController chess in chesses)
-            {
-                if (chess && chess.gameObject && chess.team == enemyTeam && chess.state != ChessState.MANAGE)
-                {
+            foreach (ChessController chess in chesses) {
+                if (chess && chess.gameObject && chess.team == enemyTeam && chess.state != ChessState.MANAGE) {
                     aim = chess;
                     break;
                 }
             }
         }
 
-        void getAttrs()
-        {
-            attr.realAtkRange = (float)(atkRange / 100.0 * board.GetBlockRange());
+        void getAttrs () {
+            attr.realAtkRange = (float) (atkRange / 100.0 * board.GetBlockRange ());
         }
 
-        void StartWalk()
-        {
-            Vector2Int want = FindPathNextBlock();
-            Vector2Int next = board.FindNearestEmptyPosition(want.x, want.y);//TODO:用广搜找路
-            jumpingFrom = new Vector2Int(x, y);
+        void StartWalk () {
+            Vector2Int want = FindPathNextBlock ();
+            Vector2Int next = board.FindNearestEmptyPosition (want.x, want.y); //TODO:用广搜找路
+            jumpingFrom = new Vector2Int (x, y);
             x = next.x;
             y = next.y;
-            SetState(ChessState.JUMPING);
+            SetState (ChessState.JUMPING);
             jumpingTimeCost = 0.0f;
         }
 
-        void SitDown(int _x, int _y)
-        {
+        void SitDown (int _x, int _y) {
             x = _x;
             y = _y;
-            Vector3 pos = board.GetChessPosition(x, y);
-            transform.SetPositionAndRotation(pos, transform.rotation);
+            Vector3 pos = board.GetChessPosition (x, y);
+            transform.SetPositionAndRotation (pos, transform.rotation);
         }
 
-        void SitDownWhenBattle()
-        {
-            SetState(ChessState.BATTLE);
-            SitDown(x, y);
+        void SitDownWhenBattle () {
+            SetState (ChessState.BATTLE);
+            SitDown (x, y);
             jumpingCooldown = DEFAULT_JUMP_COOLDOWN;
         }
 
-        public void NearBySitDown()
-        {
+        public void NearBySitDown () {
             Vector3 pos = transform.position;
-            Vector2Int selectBlock = board.GetNearestPosition(pos);
-            Vector2Int sitBlock = board.FindNearestEmptyPosition(selectBlock.x, selectBlock.y);
-            Debug.Log("Chess Sit Down By Mouse" + sitBlock + pos);
-            SitDown(sitBlock.x, sitBlock.y);
+            Vector2Int selectBlock = board.GetNearestPosition (pos);
+            Vector2Int sitBlock = board.FindNearestEmptyPosition (selectBlock.x, selectBlock.y);
+            Debug.Log ("Chess Sit Down By Mouse" + sitBlock + pos);
+            SitDown (sitBlock.x, sitBlock.y);
         }
 
-        Vector2Int FindPathNextBlock()
-        {
+        Vector2Int FindPathNextBlock () {
             int xMore = aim.x - x;
             int yMore = aim.y - y;
             int nextX = x;
             int nextY = y;
-            if (Math.Abs(yMore) >= Math.Abs(xMore))
-            {
-                nextY = y + (yMore / Math.Abs(yMore) * Math.Min(jumpRange, Math.Abs(yMore)));
-            }
-            else
-            {
-                nextX = x + (xMore / Math.Abs(xMore) * Math.Min(jumpRange, Math.Abs(xMore)));
+            if (Math.Abs (yMore) >= Math.Abs (xMore)) {
+                nextY = y + (yMore / Math.Abs (yMore) * Math.Min (jumpRange, Math.Abs (yMore)));
+            } else {
+                nextX = x + (xMore / Math.Abs (xMore) * Math.Min (jumpRange, Math.Abs (xMore)));
             }
             //TODO: 斜着走？现在只能横竖走
             //TODO: 判断已经被占位置，自动寻路
             //TODO: 刺客式绕后大跳？
-            return new Vector2Int(nextX, nextY);
+            return new Vector2Int (nextX, nextY);
         }
 
-        void StartAttack()
-        {
-            SetState(ChessState.ATTACKING);
+        void StartAttack () {
+            SetState (ChessState.ATTACKING);
             attackDoingTime = 0.0f;
         }
 
-        void DoAttack()
-        {
-            SetState(ChessState.BATTLE);
+        void DoAttack () {
+            SetState (ChessState.BATTLE);
             //TODO: 放波
-            shoot();
+            shoot ();
 
             //aim.BeAttacked(new AtkAttr(atk), this);
             nowAttackCooldown = atkCooldown;
         }
 
-        void shoot()
-        {
-            GameObject Bullet = Resources.Load("Prefabs/Bullet") as GameObject;
-            GameObject bullet = GameObject.Instantiate(Bullet);
-            bullet.transform.parent = GameObject.Find("Bullets").transform;
+        void shoot () {
+            GameObject Bullet = Resources.Load ("Prefabs/Bullet") as GameObject;
+            GameObject bullet = GameObject.Instantiate (Bullet);
+            bullet.transform.parent = GameObject.Find ("Bullets").transform;
             bullet.transform.position = transform.position;
-            BulletController bulletCtrl = bullet.GetComponent<BulletController>();
-            if (aim && aim.gameObject)
-            {
+            BulletController bulletCtrl = bullet.GetComponent<BulletController> ();
+            if (aim && aim.gameObject) {
                 bulletCtrl.aim = aim.gameObject;
             }
-            bulletCtrl.atkAttr = new AtkAttr(atk);
+            bulletCtrl.atkAttr = new AtkAttr (atk);
             bulletCtrl.speed = bulletSpeed;
-            bulletCtrl.SetAttr(bulletColor);
+            bulletCtrl.SetAttr (bulletColor);
             bulletCtrl.fromObj = this.gameObject;
         }
 
-        public void BeAttacked(AtkAttr atkAttr, System.Object fromObj)
-        {
+        public void BeAttacked (AtkAttr atkAttr, System.Object fromObj) {
             hp -= atkAttr.atk;
-            Update2DObj();
-            if (hp <= 0)
-            {
-                DestroySelf();
+            Update2DObj ();
+            if (hp <= 0) {
+                Die ();
             }
         }
 
-        void Update2DObj()
-        {
-            Vector2 pos2d = RectTransformUtility.WorldToScreenPoint(GameObject.Find("Main Camera").GetComponent<Camera>(), transform.position + new Vector3(0, 1.5f, 0));
-            hpBar.transform.position = pos2d;
-            hpBar.GetComponent<Image>().fillAmount = 1.0f * hp / maxHp;
+        private void Die () {
+            board.ChessDie(this);
+            DestroySelf ();
         }
 
-        public ChessState GetState() => state;
+        void Update2DObj () {
+            Vector2 pos2d = RectTransformUtility.WorldToScreenPoint (GameObject.Find ("Main Camera").GetComponent<Camera> (), transform.position + new Vector3 (0, 1.5f, 0));
+            hpBar.transform.position = pos2d;
+            hpBar.GetComponent<Image> ().fillAmount = 1.0f * hp / maxHp;
+        }
 
-        public void DestroySelf()
-        {
-            Destroy(hpBar.gameObject);
-            Destroy(this.gameObject);
+        public ChessState GetState () => state;
+
+        public void DestroySelf () {
+            Destroy (hpBar.gameObject);
+            Destroy (this.gameObject);
         }
     }
 }
-

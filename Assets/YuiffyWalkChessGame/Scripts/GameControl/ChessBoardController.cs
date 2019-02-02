@@ -11,6 +11,8 @@ namespace MyGameController {
         public int yMin = 0;
         public int xMax = 8;
         public int yMax = 8;
+        public int ownerTeam = 0;
+        public int enemyTeam = -1;
         public List<ChessController> chesses;
         private List<GameObject> chessesBackup = new List<GameObject> ();
         public float edgeWidth;
@@ -26,7 +28,7 @@ namespace MyGameController {
             realSize = GetComponent<Renderer> ().bounds.size;
             xBlockRange = (realSize.x - 2 * edgeWidth) / xMax;
             yBlockRange = (realSize.z - 2 * edgeWidth) / yMax;
-            Debug.Log ("board" + realSize);
+            // Debug.Log ("board" + realSize);
             foreach (ChessController chess in chesses) {
                 chess.BoardReady (this);
             }
@@ -136,11 +138,26 @@ namespace MyGameController {
             }
         }
 
+        private int enemyCount, weCount;
         public void StartBattle () {
+            weCount = 0;
+            enemyCount = 0;
             foreach (ChessController chess in chesses) {
                 if (chess.state == MyUtil.CommonUtil.ChessState.READY) {
                     chess.state = MyUtil.CommonUtil.ChessState.BATTLE;
+                    if (chess.team == ownerTeam) {
+                        weCount++;
+                        chess.enemyTeam = enemyTeam;
+                    } else {
+                        chess.team = enemyTeam;
+                        chess.enemyTeam = ownerTeam;
+                        enemyCount++;
+                    }
                 }
+            }
+            Debug.Log ("Board Start Battle" + ownerTeam + "," + weCount + "," + enemyCount);
+            if (weCount == 0 || enemyCount == 0) {
+                BattleOver (weCount >= enemyCount);
             }
         }
 
@@ -186,9 +203,41 @@ namespace MyGameController {
             chess.x = pos.x;
             chess.y = pos.y;
             chess.state = ChessState.MANAGE;
+            chess.team = ownerTeam;
+            chess.enemyTeam = enemyTeam;
             newChessObj.SetActive (true);
             chess.BoardReady (this);
             chesses.Add (chess);
+        }
+
+        public void ChessDie (ChessController chessCtrl) {
+            Debug.Log ("ChessDie" + chessCtrl.team);
+            if (chessCtrl.team == ownerTeam) {
+                weCount--;
+                if (weCount <= 0) {
+                    BattleOver (false);
+                }
+            } else {
+                enemyCount--;
+                if (enemyCount <= 0) {
+                    BattleOver (true);
+                }
+            }
+        }
+        public delegate void OnBattleOverDelegate (ChessBoardController board);
+        public event OnBattleOverDelegate OnBattleOver;
+        public void BattleOver (bool win) {
+            Debug.Log ("BattleOver" + win + "," + weCount + "," + enemyCount);
+            foreach (ChessController chess in chesses) {
+                if (chess == null) continue;
+                if (chess.gameObject && chess.state != MyUtil.CommonUtil.ChessState.MANAGE) {
+                    chess.state = ChessState.FREEZE;
+                }
+            }
+            OnBattleOver (this);
+            OnBattleOver = null;
+            //TODO: 通知DataController扣血，显示结果
+            // StopBattle ();//等所有玩家战斗完了才结束
         }
     }
 }

@@ -9,6 +9,7 @@
         public PlayerType type;
 
         public int money = 1;
+        public int hp = 50;
 
         public PlayerInfo () { }
 
