@@ -43,7 +43,7 @@ public class LocalPlayerController : MonoBehaviour {
         }
 
         DisplayController displayCtrl = GetComponent<DisplayController>();
-        displayCtrl.DataReady(dataController);
+        displayCtrl.DataReady(dataController, localPlayerInfo);
         Debug.Log("LocalPlayerCtrl dataready over");
     }
 

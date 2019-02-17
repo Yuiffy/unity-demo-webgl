@@ -41,7 +41,7 @@ public class GameFlowController : MonoBehaviour {
         Debug.Log ("GameFlow ToState" + _state);
         switch (state) {
             case GameFlowState.MANAGE:
-
+                dataController.PutMoneyToPlayers();
                 break;
             case GameFlowState.READY:
                 dataController.ArangeEnemyForBoards ();

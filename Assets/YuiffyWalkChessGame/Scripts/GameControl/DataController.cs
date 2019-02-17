@@ -223,6 +223,7 @@ public class DataController : MonoBehaviour {
         return ret;
     }
 
+    //从棋信息中生成棋实体
     private GameObject GenerateChessPrefab (string keyName, Chess data) {
         GameObject templatePrefab = Resources.Load ("Prefabs/Chess") as GameObject;
         GameObject prefab = Instantiate (templatePrefab);
@@ -231,6 +232,7 @@ public class DataController : MonoBehaviour {
         chessCtrl.data = data;
         chessCtrl.atk = data.atk;
         chessCtrl.maxHp = data.hp;
+        chessCtrl.price = data.price;
         if (data.ui != null) {
             Ui ui = data.ui;
             if (ui.color != null) {
@@ -252,11 +254,27 @@ public class DataController : MonoBehaviour {
         return prefab;
     }
 
-    public void OnePlayerBuyOneChess (int playerIndex, int chessIndex) {
+    public bool OnePlayerBuyOneChess (int playerIndex, int chessIndex) {
         List<GameObject> oneShop = PlayerShop[playerIndex];
-        PutOneChessToBoardOutside (boards[playerIndex], oneShop[chessIndex]);
-        oneShop[chessIndex].SetActive (false);
-        // DestroyImmediate(oneShop[chessIndex], true);
+        int price = oneShop[chessIndex].GetComponent<ChessController>().price;
+        int money = players[playerIndex].money;
+        Debug.Log("OnePlayerBuyOneChess"+ price+"/"+ money);
+        if (money >= price)
+        {
+            //减钱、通知
+            players[playerIndex].money -= price;
+            OnPlayerHpChange(players);
+
+            //放怪
+            PutOneChessToBoardOutside(boards[playerIndex], oneShop[chessIndex]);
+            oneShop[chessIndex].SetActive(false);
+            // DestroyImmediate(oneShop[chessIndex], true);
+            return true;
+        }
+        else {
+            Debug.Log("钱不够！");
+            return false;
+        }
     }
 
     private void PutOneChessToBoardOutside (ChessBoardController chessBoardController, GameObject gameObject) {
@@ -264,9 +282,27 @@ public class DataController : MonoBehaviour {
     }
 
     public void OnePlayerRefreshChess (int playerIndex) {
-        PutBackPlayerShopToPool (PlayerShop[playerIndex]);
-        PutRandomChessToPlayerShop (PlayerShop[playerIndex], playerShopItemCount);
-        Debug.Log ("Refresh over!" + playerIndex);
+        int price = 2;//TODO: 从RULE读
+        int money = players[playerIndex].money;
+        if (money >= price)
+        {
+            players[playerIndex].money -= price;
+            PutBackPlayerShopToPool(PlayerShop[playerIndex]);
+            PutRandomChessToPlayerShop(PlayerShop[playerIndex], playerShopItemCount);
+            Debug.Log("Refresh over!" + playerIndex);
+            OnPlayerHpChange(players);
+        }
+        else {
+            Debug.Log("没钱，刷不了新");
+        }
+
+    }
+
+    public void PutMoneyToPlayers() {
+        foreach (PlayerInfo player in players) {
+            player.money+=10;
+        }
+        OnPlayerHpChange(players);
     }
 
     public void ArangeEnemyForBoards () {

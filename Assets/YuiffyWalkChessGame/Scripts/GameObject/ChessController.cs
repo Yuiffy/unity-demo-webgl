@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using MyConfig;
 using MyEntity;
 using MyGameController;
 using MyUtil;
 using UnityEngine;
 using UnityEngine.UI;
+using static DataEntity.PlayerInfo;
 using static MyUtil.CommonUtil;
 
 namespace MyGameObject {
-    public class ChessController : MonoBehaviour {
+    public class ChessController : MonoBehaviour
+    {
+        public int price;
         public string keyName = "unknown";
         public int x;
         public int y;

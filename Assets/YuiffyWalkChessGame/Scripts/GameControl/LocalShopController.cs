@@ -47,7 +47,7 @@ public class LocalShopController : MonoBehaviour {
             newItem.SetActive (true);
             Transform label = newItem.transform.Find ("Item Label");
             Text text = label.GetComponent<Text> ();
-            text.text = chess.name;
+            text.text = chess.name + " ☆"+chess.price;
             itemsGameObj.Add (newItem);
         }
     }
@@ -70,9 +70,11 @@ public class LocalShopController : MonoBehaviour {
 
     public void BuyItem (int i) {
         Debug.Log ("CLICK" + i);
-        itemsGameObj[i].SetActive (false);
-        DestroyImmediate (itemsGameObj[i], true);
-        dataController.OnePlayerBuyOneChess (localPlayerIndex, i);
+        bool ret = dataController.OnePlayerBuyOneChess (localPlayerIndex, i);
+        if (ret) {
+            itemsGameObj[i].SetActive (false);
+            DestroyImmediate (itemsGameObj[i], true);
+        }
     }
 
     public void RefreshItems () {

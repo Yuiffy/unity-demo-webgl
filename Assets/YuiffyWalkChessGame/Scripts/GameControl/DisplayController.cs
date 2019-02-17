@@ -14,15 +14,18 @@ namespace unity_demo_webgl.Assets.YuiffyWalkChessGame.Scripts.GameControl {
     public class DisplayController : MonoBehaviour {
 
         private List<PlayerInfo> players;
+        private PlayerInfo localPlayer;
         private DataController dataController;
         public Text scoreBoard;
+        public Text localMoney;
         void Start () {
 
         }
 
-        public void DataReady (DataController _dataController) {
+        public void DataReady (DataController _dataController, PlayerInfo localPlayerInfo) {
             dataController = _dataController;
             players = dataController.players;
+            localPlayer = localPlayerInfo;
             dataController.OnPlayerHpChange += PlayerHpChangeHandler;
             Debug.Log("!");
             UpdateDisplay ();
@@ -35,10 +38,10 @@ namespace unity_demo_webgl.Assets.YuiffyWalkChessGame.Scripts.GameControl {
 
         void UpdateDisplay () {
             var nameAndScore = players.Select (person => person.name + " " + person.hp).ToArray ();
-            string s = string.Join ("\n", nameAndScore);
-            Debug.Log ("update display " + s);
-            scoreBoard.text = s;
+            string scoreBoardString = string.Join ("\n", nameAndScore);
+            Debug.Log ("update display " + scoreBoardString);
+            scoreBoard.text = scoreBoardString;
+            localMoney.text = "$"+localPlayer.money;
         }
-
     }
 }

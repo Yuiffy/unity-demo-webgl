@@ -4,6 +4,7 @@
       "keyName": "horseHead",
       "hp": 500,
       "atk": 50,
+	  "price": 1,
       "ui": {
         "color": "white",
         "name": "马头",
@@ -14,6 +15,7 @@
       "keyName": "capsule",
       "hp": 200,
       "atk": 100,
+	  "price": 2,
       "ui": {
         "color": "yellow",
         "name": "药丸",

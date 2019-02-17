@@ -16,6 +16,7 @@ namespace MyConfig
         public int hp;
         public int atk;
         public Ui ui;
+        public int price;
     }
     [Serializable]
     public class Shop
